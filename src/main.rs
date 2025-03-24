@@ -1,130 +1,107 @@
-//! Demonstrates how to animate colors in different color spaces using mixing and splines.
+//! Shows how to render simple primitive shapes with a single color.
+//!
+//! You can toggle wireframes with the space bar except on wasm. Wasm does not support
+//! `POLYGON_MODE_LINE` on the gpu.
 
-use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
-    math::VectorSpace,
-    prelude::*,
-};
+use std::iter;
 
-// We define this trait so we can reuse the same code for multiple color types that may be implemented using curves.
-trait CurveColor: VectorSpace + Into<Color> + Send + Sync + 'static {}
-impl<T: VectorSpace + Into<Color> + Send + Sync + 'static> CurveColor for T {}
+use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+use bevy::prelude::*;
+use bevy::sprite::{Wireframe2dConfig, Wireframe2dPlugin};
+use rand::rngs::SmallRng;
+use rand::Rng;
 
-// We define this trait so we can reuse the same code for multiple color types that may be implemented using mixing.
-trait MixedColor: Mix + Into<Color> + Send + Sync + 'static {}
-impl<T: Mix + Into<Color> + Send + Sync + 'static> MixedColor for T {}
+#[derive(Component)]
+struct MyNode {
+    pos: Vec2,
+    size: f32,
+}
 
-#[derive(Debug, Component)]
-struct Curve<T: CurveColor>(CubicCurve<T>);
-
-#[derive(Debug, Component)]
-struct Mixed<T: MixedColor>([T; 4]);
-
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(FrameTimeDiagnosticsPlugin)
-        .add_plugins(LogDiagnosticsPlugin::default())
-        .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (
-                animate_curve::<LinearRgba>,
-                animate_curve::<Oklaba>,
-                animate_curve::<Xyza>,
-                animate_mixed::<Hsla>,
-                animate_mixed::<Srgba>,
-                animate_mixed::<Oklcha>,
+impl MyNode {
+    fn random(rand: &mut SmallRng) -> Self {
+        MyNode {
+            pos: Vec2::new(
+                (rand.random::<f32>() - 0.5) * 1200.0, // TODO dimension hardcoded
+                (rand.random::<f32>() - 0.5) * 600.0,  // TODO dimension hardcoded
             ),
-        )
-        .run();
-}
-
-fn setup(mut commands: Commands) {
-    commands.spawn(Camera2d);
-
-    // The color spaces `Oklaba`, `Laba`, `LinearRgba`, `Srgba` and `Xyza` all are either perceptually or physically linear.
-    // This property allows us to define curves, e.g. bezier curves through these spaces.
-
-    // Define the control points for the curve.
-    // For more information, please see the cubic curve example.
-    let colors = [
-        LinearRgba::WHITE,
-        LinearRgba::rgb(1., 1., 0.), // Yellow
-        LinearRgba::RED,
-        LinearRgba::BLACK,
-    ];
-    // Spawn a sprite using the provided colors as control points.
-    spawn_curve_sprite(&mut commands, 275., colors);
-
-    // Spawn another sprite using the provided colors as control points after converting them to the `Xyza` color space.
-    spawn_curve_sprite(&mut commands, 175., colors.map(Xyza::from));
-
-    spawn_curve_sprite(&mut commands, 75., colors.map(Oklaba::from));
-
-    // Other color spaces like `Srgba` or `Hsva` are neither perceptually nor physically linear.
-    // As such, we cannot use curves in these spaces.
-    // However, we can still mix these colors and animate that way. In fact, mixing colors works in any color space.
-
-    // Spawn a spritre using the provided colors for mixing.
-    spawn_mixed_sprite(&mut commands, -75., colors.map(Hsla::from));
-
-    spawn_mixed_sprite(&mut commands, -175., colors.map(Srgba::from));
-
-    spawn_mixed_sprite(&mut commands, -275., colors.map(Oklcha::from));
-}
-
-fn spawn_curve_sprite<T: CurveColor>(commands: &mut Commands, y: f32, points: [T; 4]) {
-    commands.spawn((
-        Sprite::sized(Vec2::new(75., 75.)),
-        Transform::from_xyz(0., y, 0.),
-        Curve(CubicBezier::new([points]).to_curve().unwrap()),
-    ));
-}
-
-fn spawn_mixed_sprite<T: MixedColor>(commands: &mut Commands, y: f32, colors: [T; 4]) {
-    commands.spawn((
-        Transform::from_xyz(0., y, 0.),
-        Sprite::sized(Vec2::new(75., 75.)),
-        Mixed(colors),
-    ));
-}
-
-fn animate_curve<T: CurveColor>(
-    time: Res<Time>,
-    mut query: Query<(&mut Transform, &mut Sprite, &Curve<T>)>,
-) {
-    let t = (ops::sin(time.elapsed_secs()) + 1.) / 2.;
-
-    for (mut transform, mut sprite, cubic_curve) in &mut query {
-        // position takes a point from the curve where 0 is the initial point
-        // and 1 is the last point
-        sprite.color = cubic_curve.0.position(t).into();
-        transform.translation.x = 600. * (t - 0.5);
+            size: 4.0 + rand.random::<f32>() * 16.0, // TODO size hardcoded
+        }
     }
 }
 
-fn animate_mixed<T: MixedColor>(
+fn main() {
+    let mut app = App::new();
+    app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
+    app.add_plugins((DefaultPlugins, Wireframe2dPlugin))
+        .add_systems(Startup, setup);
+    app.add_systems(Update, toggle_wireframe);
+    app.add_systems(Update, animate);
+    app.run();
+}
+
+const X_EXTENT: f32 = 900.;
+
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands.spawn(Camera2d);
+
+    let shapes: Vec<Handle<Mesh>> =
+        iter::from_fn(|| Some(meshes.add(RegularPolygon::new(50.0, 6))))
+            .take(10)
+            .collect();
+
+    let num_shapes = shapes.len();
+
+    for (i, shape) in shapes.into_iter().enumerate() {
+        // Distribute colors evenly across the rainbow.
+        let color = Color::hsl(360. * i as f32 / num_shapes as f32, 0.95, 0.7);
+
+        commands.spawn((
+            Mesh2d(shape),
+            MeshMaterial2d(materials.add(color)),
+            Transform::from_xyz(
+                // Distribute shapes from -X_EXTENT/2 to +X_EXTENT/2.
+                -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
+                0.0,
+                0.0,
+            ),
+        ));
+    }
+
+    commands.spawn((
+        Text::new("Press space to toggle wireframes"),
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(12.0),
+            left: Val::Px(12.0),
+            ..default()
+        },
+    ));
+}
+
+fn toggle_wireframe(
+    mut wireframe_config: ResMut<Wireframe2dConfig>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+) {
+    if keyboard.just_pressed(KeyCode::Space) {
+        wireframe_config.global = !wireframe_config.global;
+    }
+}
+
+fn animate(
     time: Res<Time>,
-    mut query: Query<(&mut Transform, &mut Sprite, &Mixed<T>)>,
+    mut query: Query<(
+        &mut Mesh2d,
+        &mut MeshMaterial2d<ColorMaterial>,
+        &mut Transform,
+    )>,
 ) {
     let t = (ops::sin(time.elapsed_secs()) + 1.) / 2.;
 
-    for (mut transform, mut sprite, mixed) in &mut query {
-        sprite.color = {
-            // First, we determine the amount of intervals between colors.
-            // For four colors, there are three intervals between those colors;
-            let intervals = (mixed.0.len() - 1) as f32;
-
-            // Next we determine the index of the first of the two colorts to mix.
-            let start_i = (t * intervals).floor().min(intervals - 1.);
-
-            // Lastly we determine the 'local' value of t in this interval.
-            let local_t = (t * intervals) - start_i;
-
-            let color = mixed.0[start_i as usize].mix(&mixed.0[start_i as usize + 1], local_t);
-            color.into()
-        };
-        transform.translation.x = 600. * (t - 0.5);
+    for (mut mesh, mut material, mut transform) in &mut query {
+        transform.translation.y = 600. * (t - 0.5);
     }
 }

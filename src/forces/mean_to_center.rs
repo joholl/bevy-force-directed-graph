@@ -7,7 +7,7 @@ use bevy::{
 use crate::common::{MouseLocked, NodePhysics};
 
 /* This is not really a force. It shifts all nodes so that their mean is in the middle. */
-pub fn apply_center_force(
+pub fn apply_mean_to_center(
     mut transforms_q: Query<(&mut Transform, Option<&MouseLocked>), With<NodePhysics>>,
 ) {
     let center = Vec2::ZERO;

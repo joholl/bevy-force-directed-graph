@@ -1,4 +1,3 @@
-
 use bevy::{
     ecs::{
         query::With,
@@ -10,7 +9,7 @@ use bevy::{
 };
 use rand::Rng;
 
-use crate::{
+use crate::bevy::{
     common::{alpha, MouseLocked, NodePhysics},
     utils::{FiniteOr as _, MapNonFinite},
 };

@@ -8,7 +8,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::common::{alpha, MouseLocked, NodePhysics};
+use crate::bevy::common::{alpha, MouseLocked, NodePhysics};
 
 /// Add a force for counter-clockwise rotation around the center of the screen.
 pub fn apply_galaxy_force(

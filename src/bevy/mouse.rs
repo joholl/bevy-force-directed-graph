@@ -9,7 +9,7 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-use crate::common::MouseLocked;
+use crate::bevy::common::MouseLocked;
 
 pub fn drag_n_drop(
     trigger: Trigger<Pointer<Drag>>,

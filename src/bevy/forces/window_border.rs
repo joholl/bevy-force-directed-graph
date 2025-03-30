@@ -4,7 +4,7 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-use crate::common::{MouseLocked, NodePhysics};
+use crate::bevy::common::{MouseLocked, NodePhysics};
 
 /* This is not really a force. It shifts all nodes inside the visible area of the window. */
 pub fn apply_window_border(

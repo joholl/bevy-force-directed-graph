@@ -7,7 +7,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::common::{alpha, MouseLocked, NodeLink, NodePhysics};
+use crate::bevy::common::{alpha, MouseLocked, NodeLink, NodePhysics};
 
 pub fn apply_link_force(
     links_q: Query<&NodeLink, Without<NodePhysics>>,

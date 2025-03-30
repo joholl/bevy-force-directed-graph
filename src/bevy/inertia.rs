@@ -4,7 +4,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::common::{MouseLocked, NodePhysics};
+use crate::bevy::common::{MouseLocked, NodePhysics};
 
 /// Given a node position (Transform), its previous position, and acceleration (NodePhysics), this function
 /// calculates the new position using Verlet integration.

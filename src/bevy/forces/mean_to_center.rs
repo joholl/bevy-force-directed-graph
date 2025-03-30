@@ -4,7 +4,7 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::common::{MouseLocked, NodePhysics};
+use crate::bevy::common::{MouseLocked, NodePhysics};
 
 /* This is not really a force. It shifts all nodes so that their mean is in the middle. */
 pub fn apply_mean_to_center(

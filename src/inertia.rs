@@ -51,5 +51,13 @@ pub fn apply_velocity(
             transform.translation = position_next.extend(transform.translation.z);
         }
         node_physics.previous_position = previous_position_next;
+
+        #[cfg(debug_assertions)]
+        if transform.translation.x.is_nan()
+            || transform.translation.y.is_nan()
+            || transform.translation.z.is_nan()
+        {
+            panic!("NaN in transform: {:?}", &transform);
+        }
     }
 }

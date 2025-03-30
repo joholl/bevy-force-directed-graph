@@ -36,9 +36,24 @@ pub fn apply_link_force(
         if mouse_locked.is_none() {
             source_transform.translation += position_delta.extend(0.0);
         }
+        #[cfg(debug_assertions)]
+        if source_transform.translation.x.is_nan()
+            || source_transform.translation.y.is_nan()
+            || source_transform.translation.z.is_nan()
+        {
+            panic!("NaN in transform: {:?}", &source_transform);
+        }
+
         let (mut target_transform, mouse_locked) = transforms_q.get_mut(link.target).unwrap();
         if mouse_locked.is_none() {
             target_transform.translation -= position_delta.extend(0.0);
+        }
+        #[cfg(debug_assertions)]
+        if target_transform.translation.x.is_nan()
+            || target_transform.translation.y.is_nan()
+            || target_transform.translation.z.is_nan()
+        {
+            panic!("NaN in transform: {:?}", &target_transform);
         }
     }
 }

@@ -24,5 +24,13 @@ pub fn apply_mean_to_center(
         if mouse_locked.is_none() {
             transform.translation += correction.extend(0.0);
         }
+
+        #[cfg(debug_assertions)]
+        if transform.translation.x.is_nan()
+            || transform.translation.y.is_nan()
+            || transform.translation.z.is_nan()
+        {
+            panic!("NaN in transform: {:?}", &transform);
+        }
     }
 }

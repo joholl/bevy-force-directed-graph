@@ -25,6 +25,14 @@ pub fn apply_galaxy_force(
             if mouse_locked.is_none() {
                 transform.translation += force;
             }
+
+            #[cfg(debug_assertions)]
+            if transform.translation.x.is_nan()
+                || transform.translation.y.is_nan()
+                || transform.translation.z.is_nan()
+            {
+                panic!("NaN in transform: {:?}", &transform);
+            }
         }
     }
 }

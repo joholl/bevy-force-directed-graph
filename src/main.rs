@@ -8,6 +8,7 @@ mod common;
 mod forces;
 mod inertia;
 mod mouse;
+mod utils;
 
 fn main() {
     App::new()
@@ -36,7 +37,7 @@ fn main() {
                 forces::mean_to_center::apply_mean_to_center,
                 forces::link::apply_link_force,
                 forces::repulsion::apply_repulsion_force,
-                forces::galaxy::apply_galaxy_force,
+                //forces::galaxy::apply_galaxy_force,
                 forces::window_border::apply_window_border,
                 inertia::apply_velocity,
                 update_links,
@@ -57,10 +58,10 @@ fn setup(
     commands.spawn(Camera2d);
 
     //for (i, shape) in shapes.into_iter().enumerate() {
-    let num_entities = 15;
+    let num_entities: u16 = 300;
     let entities = (0..num_entities)
         .map(|i| {
-            let radius = 20.0;
+            let radius = 10.0;
             let shape = meshes.add(RegularPolygon::new(radius, 6));
 
             // Distribute colors evenly across the rainbow.
@@ -94,7 +95,7 @@ fn setup(
         .collect::<Vec<_>>();
 
     // Create random links between nodes
-    for _ in 0..(num_entities as f32 * 1.2) as i32 {
+    for _ in 0..(f32::from(num_entities) * 1.2) as u32 {
         let a = entities.choose(&mut rng).unwrap();
         let b = entities.choose(&mut rng).unwrap();
         if a == b {
@@ -105,7 +106,7 @@ fn setup(
             NodeLink {
                 source: *a,
                 target: *b,
-                target_distance: rng.random_range(100.0..300.0),
+                target_distance: rng.random_range(30.0..100.0),
             },
             // will be transformed
             Mesh2d(meshes.add(Rectangle::new(1.0, 1.0))),

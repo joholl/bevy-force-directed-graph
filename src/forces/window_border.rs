@@ -26,5 +26,13 @@ pub fn apply_window_border(
     for (mut transform, _mouse_locked) in &mut transforms_q {
         transform.translation.x = transform.translation.x.clamp(x_min, x_max);
         transform.translation.y = transform.translation.y.clamp(y_min, y_max);
+
+        #[cfg(debug_assertions)]
+        if transform.translation.x.is_nan()
+            || transform.translation.y.is_nan()
+            || transform.translation.z.is_nan()
+        {
+            panic!("NaN in transform: {:?}", &transform);
+        }
     }
 }

@@ -5,6 +5,9 @@ use bevy::{
 };
 
 #[derive(Component)]
+pub struct NodeIndex(pub petgraph::prelude::NodeIndex);
+
+#[derive(Component)]
 pub struct NodePhysics {
     pub previous_position: Vec2,
 }

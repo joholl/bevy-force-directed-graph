@@ -3,15 +3,13 @@ use bevy::{
         query::With,
         system::{Query, Res},
     },
-    math::Vec2,
     time::Time,
     transform::components::Transform,
 };
-use rand::Rng;
 
 use crate::bevy::{
     common::{alpha, MouseLocked, NodePhysics},
-    utils::{FiniteOr as _, MapNonFinite},
+    utils::{FiniteOr as _, FiniteOrRandom as _},
 };
 
 pub fn apply_repulsion_force(
@@ -30,11 +28,7 @@ pub fn apply_repulsion_force(
         let distance = distance.finite_or(10.0).clamp(10.0, f32::MAX);
 
         // if the direction vector is zero, normalizing will lead to NaN (-> take a random direction)
-        let direction = direction.normalize().map_nonfinite(|| {
-            let mut rng = rand::rng();
-            let angle = rng.random_range(0.0..std::f32::consts::TAU); // TAU = 2π
-            Vec2::new(angle.cos(), angle.sin())
-        });
+        let direction = direction.normalize().finite_or_random_normalized();
 
         // Calculate the repulsion based on the distance
         let strength = 100000.0;

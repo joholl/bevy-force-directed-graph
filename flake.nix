@@ -16,6 +16,7 @@
         buildInputs = [
           pkgs.rustc
           pkgs.cargo
+          pkgs.mold
 
           pkgs.udev
           pkgs.alsa-lib

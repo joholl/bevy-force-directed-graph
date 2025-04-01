@@ -1,6 +1,7 @@
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
+use bevy::utils::HashMap;
 use bevy::{prelude::*, window};
-use common::{NodeLink, NodePhysics};
+use common::{NodeIndex, NodeLink, NodePhysics};
 use rand::seq::IndexedRandom as _;
 use rand::Rng;
 
@@ -10,7 +11,12 @@ mod inertia;
 mod mouse;
 mod utils;
 
-pub fn main() {
+pub fn run(
+    graph: petgraph::Graph<
+        dot_parser::canonical::Node<(String, String)>,
+        dot_parser::ast::AList<(String, String)>,
+    >,
+) {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -30,7 +36,7 @@ pub fn main() {
                 enabled: true,
             },
         })
-        .add_systems(Startup, setup)
+        .add_systems(Startup, setup(graph))
         .add_systems(
             Update,
             (
@@ -49,82 +55,94 @@ pub fn main() {
 const X_EXTENT: f32 = 900.;
 
 fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-    let mut rng = rand::rng();
+    graph: petgraph::Graph<
+        dot_parser::canonical::Node<(String, String)>,
+        dot_parser::ast::AList<(String, String)>,
+    >,
+) -> impl FnMut(Commands, ResMut<Assets<Mesh>>, ResMut<Assets<ColorMaterial>>) {
+    move |mut commands: Commands,
+          mut meshes: ResMut<Assets<Mesh>>,
+          mut materials: ResMut<Assets<ColorMaterial>>| {
+        let mut rng = rand::rng();
 
-    commands.spawn(Camera2d);
+        commands.spawn(Camera2d);
 
-    //for (i, shape) in shapes.into_iter().enumerate() {
-    let num_entities: u16 = 300;
-    let entities = (0..num_entities)
-        .map(|i| {
-            let radius = 10.0;
-            let shape = meshes.add(RegularPolygon::new(radius, 6));
+        let num_entities = graph.node_count() as u16; // TODO
 
-            // Distribute colors evenly across the rainbow.
-            let color = Color::hsl(360. * i as f32 / num_entities as f32, 0.95, 0.7);
+        // TODO can we do this better? We should not have to store the entities locally again
+        let entities: HashMap<_, _> = graph
+            .node_indices()
+            .enumerate()
+            .map(|(i, node_idx)| {
+                let radius = 10.0;
+                let shape = meshes.add(RegularPolygon::new(radius, 6));
 
-            // Random transform (from -X_EXTENT/2 to X_EXTENT/2)
-            let transform = Transform::from_xyz(
-                rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
-                rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
-                rng.random_range(0.0..1.0),
-            );
+                // Distribute colors evenly across the rainbow.
+                let color = Color::hsl(360. * i as f32 / num_entities as f32, 0.95, 0.7);
 
-            commands
-                .spawn((
-                    Sprite {
-                        // needed for drag and drop
-                        color: Color::srgba(0.0, 0.0, 0.0, 0.0),
-                        custom_size: Some(Vec2::new(radius, radius)),
-                        ..default()
-                    },
-                    Mesh2d(shape),
-                    MeshMaterial2d(materials.add(color)),
-                    transform,
-                    NodePhysics::from_transform(transform),
-                ))
-                .observe(mouse::drag_n_drop)
-                .observe(mouse::drag_start)
-                .observe(mouse::drag_end)
-                .id()
-        })
-        .collect::<Vec<_>>();
+                // Random transform (from -X_EXTENT/2 to X_EXTENT/2)
+                let transform = Transform::from_xyz(
+                    rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
+                    rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
+                    rng.random_range(0.0..1.0),
+                );
 
-    // Create random links between nodes
-    for _ in 0..(f32::from(num_entities) * 1.2) as u32 {
-        let a = entities.choose(&mut rng).unwrap();
-        let b = entities.choose(&mut rng).unwrap();
-        if a == b {
-            continue;
+                (
+                    node_idx,
+                    commands
+                        .spawn((
+                            Sprite {
+                                // needed for drag and drop
+                                color: Color::srgba(0.0, 0.0, 0.0, 0.0),
+                                custom_size: Some(Vec2::new(radius, radius)),
+                                ..default()
+                            },
+                            Mesh2d(shape),
+                            MeshMaterial2d(materials.add(color)),
+                            transform,
+                            NodeIndex(node_idx),
+                            NodePhysics::from_transform(transform),
+                        ))
+                        .observe(mouse::drag_n_drop)
+                        .observe(mouse::drag_start)
+                        .observe(mouse::drag_end)
+                        .id(),
+                )
+            })
+            .collect();
+
+        // Create random links between nodes
+        for edge in graph.raw_edges() {
+            let a = entities.get(&edge.source()).unwrap();
+            let b = entities.get(&edge.target()).unwrap();
+            if a == b {
+                continue;
+            }
+
+            commands.spawn((
+                NodeLink {
+                    source: *a,
+                    target: *b,
+                    target_distance: 30.0,
+                },
+                // will be transformed
+                Mesh2d(meshes.add(Rectangle::new(1.0, 1.0))),
+                MeshMaterial2d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
+                // will be updated later
+                Transform::default(),
+            ));
         }
 
-        commands.spawn((
-            NodeLink {
-                source: *a,
-                target: *b,
-                target_distance: rng.random_range(30.0..100.0),
-            },
-            // will be transformed
-            Mesh2d(meshes.add(Rectangle::new(1.0, 1.0))),
-            MeshMaterial2d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
-            // will be updated later
-            Transform::default(),
-        ));
+        // commands.spawn((
+        //     Text::new("Press space to toggle wireframes"),
+        //     Node {
+        //         position_type: PositionType::Absolute,
+        //         top: Val::Px(12.0),
+        //         left: Val::Px(12.0),
+        //         ..default()
+        //     },
+        // ));
     }
-
-    // commands.spawn((
-    //     Text::new("Press space to toggle wireframes"),
-    //     Node {
-    //         position_type: PositionType::Absolute,
-    //         top: Val::Px(12.0),
-    //         left: Val::Px(12.0),
-    //         ..default()
-    //     },
-    // ));
 }
 
 fn update_links(

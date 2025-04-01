@@ -7,7 +7,10 @@ use bevy::{
     transform::components::Transform,
 };
 
-use crate::bevy::common::{alpha, MouseLocked, NodeLink, NodePhysics};
+use crate::bevy::{
+    common::{alpha, MouseLocked, NodeLink, NodePhysics},
+    utils::FiniteOr as _,
+};
 
 pub fn apply_link_force(
     links_q: Query<&NodeLink, Without<NodePhysics>>,
@@ -25,6 +28,9 @@ pub fn apply_link_force(
             // Calculate the direction and distance between the two nodes
             let direction = target_position - source_position;
             let distance = direction.length();
+
+            // prevent divide by zero and clamp to avoid too big forces
+            let distance = distance.finite_or(10.0).clamp(10.0, 1000.0);
 
             let strength = 1.0;
             let force = (distance - link.target_distance) / distance * strength;

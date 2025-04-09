@@ -1,20 +1,21 @@
+use crate::force_directed_graph::common::{MouseLocked, NodePhysics};
 use bevy::{
     ecs::system::{Query, Res},
     time::Time,
     transform::components::Transform,
 };
 
-use crate::bevy::common::{MouseLocked, NodePhysics};
-
-/// Given a node position (Transform), its previous position, and acceleration (NodePhysics), this function
-/// calculates the new position using Verlet integration.
+/// Given a node position (Transform) and its previous position (NodePhysics),
+/// this function calculates the new position using Verlet integration.
 ///
-/// Usually, the Verlet integration considers the acceleration (based on a mass of 1).
-/// However, here the forces change the current position directly, so we do not need to consider the acceleration.
+/// Usually, the Verlet integration considers the acceleration (based on some
+/// forces and a mass of 1). However, here the forces change the current
+/// position directly, so we do not need to consider (i.e. save and calculate)
+/// the acceleration.
 ///
 /// Inputs:
 ///  - node position: result of last Verlet integration step
-///  - previous position: result of the penultimate Verlet integration step
+///  - previous position: result of the Verlet integration step before that
 ///
 /// Outputs:
 ///  - node position: new position of the node
@@ -23,13 +24,7 @@ pub fn apply_velocity(
     mut nodes_q: Query<(&mut Transform, &mut NodePhysics, Option<&MouseLocked>)>,
     _time: Res<Time>,
 ) {
-    // TODO when dt changes, this gets messy
-    // e.g.
-    //  * dt_previous = 1s
-    //    dx_previous = pos_penultimate - pos_previous = 1m
-    //  * dt_current = 0.5s
-    //    dx_current = pos_previous - pos_current =
-    //    => speedup!?
+    // TODO when dt (aka the framerate) changes, this gets a bit messy
 
     //let dt = time.delta_secs();
     let velocity_decay = 0.95;
@@ -52,6 +47,7 @@ pub fn apply_velocity(
         }
         node_physics.previous_position = previous_position_next;
 
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if transform.translation.x.is_nan()
             || transform.translation.y.is_nan()

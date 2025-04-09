@@ -1,3 +1,7 @@
+use crate::force_directed_graph::{
+    common::{alpha, MouseLocked, NodePhysics},
+    utils::{FiniteOr as _, FiniteOrRandom as _},
+};
 use bevy::{
     ecs::{
         query::With,
@@ -5,11 +9,6 @@ use bevy::{
     },
     time::Time,
     transform::components::Transform,
-};
-
-use crate::bevy::{
-    common::{alpha, MouseLocked, NodePhysics},
-    utils::{FiniteOr as _, FiniteOrRandom as _},
 };
 
 pub fn apply_repulsion_force(
@@ -56,6 +55,7 @@ pub fn apply_repulsion_force(
             b_transform.translation += force.extend(0.0);
         }
 
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if a_transform.translation.x.is_nan()
             || a_transform.translation.y.is_nan()

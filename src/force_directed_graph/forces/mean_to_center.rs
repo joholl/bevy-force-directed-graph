@@ -1,10 +1,9 @@
+use crate::force_directed_graph::common::{MouseLocked, NodePhysics};
 use bevy::{
     ecs::{query::With, system::Query},
     math::Vec2,
     transform::components::Transform,
 };
-
-use crate::bevy::common::{MouseLocked, NodePhysics};
 
 /* This is not really a force. It shifts all nodes so that their mean is in the middle. */
 pub fn apply_mean_to_center(
@@ -25,6 +24,7 @@ pub fn apply_mean_to_center(
             transform.translation += correction.extend(0.0);
         }
 
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if transform.translation.x.is_nan()
             || transform.translation.y.is_nan()

@@ -1,3 +1,4 @@
+use crate::force_directed_graph::common::{alpha, MouseLocked, NodePhysics};
 use bevy::{
     ecs::{
         query::With,
@@ -7,8 +8,6 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
-
-use crate::bevy::common::{alpha, MouseLocked, NodePhysics};
 
 /// Add a force for counter-clockwise rotation around the center of the screen.
 pub fn apply_galaxy_force(
@@ -26,6 +25,7 @@ pub fn apply_galaxy_force(
                 transform.translation += force;
             }
 
+            // This is for debugging only, if by a bug we end up with NaN in the transform
             #[cfg(debug_assertions)]
             if transform.translation.x.is_nan()
                 || transform.translation.y.is_nan()

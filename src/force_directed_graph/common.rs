@@ -4,6 +4,9 @@ use bevy::{
     transform::components::Transform,
 };
 
+/// Component to save a nodes previous position. Instead of saving the velocity,
+/// we approximate the velocity via the difference between the current and
+/// previous position. This is needed for inertia.
 #[derive(Component)]
 pub struct NodePhysics {
     pub previous_position: Vec2,
@@ -16,6 +19,8 @@ impl NodePhysics {
         }
     }
 }
+
+/// Component for saving which nodes a given link connects.
 #[derive(Component)]
 pub struct NodeLink {
     pub source: Entity,
@@ -23,6 +28,9 @@ pub struct NodeLink {
     pub target_distance: f32,
 }
 
+// `MouseLocked` is a marker component for node entities which are currently
+// drag-and-dropped. This is needed for disabling forces and inertia
+// temporarily.
 #[derive(Component, Debug)]
 pub struct MouseLocked;
 

@@ -1,5 +1,4 @@
-use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
-use bevy::{prelude::*, window};
+use bevy::prelude::*;
 use common::{NodeLink, NodePhysics};
 use rand::seq::IndexedRandom as _;
 use rand::Rng;
@@ -10,26 +9,10 @@ mod inertia;
 mod mouse;
 mod utils;
 
+/// Run the bevy application. Blocks until the window is closed.
 pub fn run() {
     App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Force-directed Graph".to_string(),
-                present_mode: window::PresentMode::AutoNoVsync,
-                ..Default::default()
-            }),
-            ..Default::default()
-        }))
-        .add_plugins(FpsOverlayPlugin {
-            config: FpsOverlayConfig {
-                text_config: TextFont {
-                    font_size: 12.0,
-                    ..default()
-                },
-                text_color: Color::WHITE.with_alpha(0.3),
-                enabled: true,
-            },
-        })
+        .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
         .add_systems(
             Update,
@@ -48,6 +31,7 @@ pub fn run() {
 
 const X_EXTENT: f32 = 900.;
 
+/// Spawn camera, nodes, and links
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -57,34 +41,38 @@ fn setup(
 
     commands.spawn(Camera2d);
 
-    //for (i, shape) in shapes.into_iter().enumerate() {
-    let num_entities: u16 = 100;
+    // For every node ("entity")
+    let num_entities: u16 = 50;
     let entities = (0..num_entities)
         .map(|i| {
-            let radius = 10.0;
-            let shape = meshes.add(RegularPolygon::new(radius, 6));
+            let radius = 15.0;
+            let shape = meshes.add(Circle::new(radius));
 
             // Distribute colors evenly across the rainbow.
             let color = Color::hsl(360. * i as f32 / num_entities as f32, 0.95, 0.7);
 
-            // Random transform (from -X_EXTENT/2 to X_EXTENT/2)
+            // Random position ("transform"): from -X_EXTENT/2 to X_EXTENT/2
             let transform = Transform::from_xyz(
                 rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
                 rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
                 rng.random_range(0.0..1.0),
             );
 
+            // Spawn the node entity with its components (Sprite, Mesh2d, etc.)
             commands
                 .spawn((
+                    // Transparent sprite, only needed for drag and drop
                     Sprite {
-                        // needed for drag and drop
                         color: Color::srgba(0.0, 0.0, 0.0, 0.0),
                         custom_size: Some(Vec2::new(radius, radius)),
                         ..default()
                     },
+                    // Actual appearance
                     Mesh2d(shape),
                     MeshMaterial2d(materials.add(color)),
+                    // X/Y position
                     transform,
+                    // Additional physics information: previous position to approximate velocity for inertia
                     NodePhysics::from_transform(transform),
                 ))
                 .observe(mouse::drag_n_drop)
@@ -104,29 +92,22 @@ fn setup(
 
         commands.spawn((
             NodeLink {
+                // The two nodes to be linked
                 source: *a,
                 target: *b,
-                target_distance: rng.random_range(30.0..100.0),
+                // Target distance for the link force
+                target_distance: rng.random_range(50.0..150.0),
             },
-            // will be transformed
+            // Rectangle dimensions will be transformed later in [update_links]
             Mesh2d(meshes.add(Rectangle::new(1.0, 1.0))),
             MeshMaterial2d(materials.add(Color::srgba(1.0, 1.0, 1.0, 0.5))),
-            // will be updated later
+            // Position will be transformed later [uodate_links]
             Transform::default(),
         ));
     }
-
-    // commands.spawn((
-    //     Text::new("Press space to toggle wireframes"),
-    //     Node {
-    //         position_type: PositionType::Absolute,
-    //         top: Val::Px(12.0),
-    //         left: Val::Px(12.0),
-    //         ..default()
-    //     },
-    // ));
 }
 
+/// Update the links between nodes (position and rotation)
 fn update_links(
     mut links_q: Query<(&NodeLink, &mut Transform), Without<NodePhysics>>,
     transforms_q: Query<&Transform, With<NodePhysics>>,
@@ -144,7 +125,7 @@ fn update_links(
         let angle = Vec2::X.angle_to(direction);
         let length = direction.length();
 
-        let thickness = 3.0;
+        let thickness = 2.5;
 
         // Update the link's transform to match the source and target positions
         link_transform.translation = midpoint.extend(0.0);

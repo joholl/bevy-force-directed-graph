@@ -1,3 +1,7 @@
+use crate::force_directed_graph::{
+    common::{alpha, MouseLocked, NodeLink, NodePhysics},
+    utils::FiniteOr as _,
+};
 use bevy::{
     ecs::{
         query::{With, Without},
@@ -5,11 +9,6 @@ use bevy::{
     },
     time::Time,
     transform::components::Transform,
-};
-
-use crate::bevy::{
-    common::{alpha, MouseLocked, NodeLink, NodePhysics},
-    utils::FiniteOr as _,
 };
 
 pub fn apply_link_force(
@@ -42,6 +41,7 @@ pub fn apply_link_force(
         if mouse_locked.is_none() {
             source_transform.translation += position_delta.extend(0.0);
         }
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if source_transform.translation.x.is_nan()
             || source_transform.translation.y.is_nan()
@@ -54,6 +54,7 @@ pub fn apply_link_force(
         if mouse_locked.is_none() {
             target_transform.translation -= position_delta.extend(0.0);
         }
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if target_transform.translation.x.is_nan()
             || target_transform.translation.y.is_nan()

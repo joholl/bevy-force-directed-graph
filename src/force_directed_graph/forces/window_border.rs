@@ -1,10 +1,9 @@
+use crate::force_directed_graph::common::{MouseLocked, NodePhysics};
 use bevy::{
     ecs::{query::With, system::Query},
     render::camera::{Camera, OrthographicProjection},
     transform::components::{GlobalTransform, Transform},
 };
-
-use crate::bevy::common::{MouseLocked, NodePhysics};
 
 /* This is not really a force. It shifts all nodes inside the visible area of the window. */
 pub fn apply_window_border(
@@ -27,6 +26,7 @@ pub fn apply_window_border(
         transform.translation.x = transform.translation.x.clamp(x_min, x_max);
         transform.translation.y = transform.translation.y.clamp(y_min, y_max);
 
+        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
         if transform.translation.x.is_nan()
             || transform.translation.y.is_nan()

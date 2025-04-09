@@ -1,5 +1,5 @@
-mod bevy;
+mod force_directed_graph;
 
 fn main() {
-    bevy::run();
+    force_directed_graph::run();
 }

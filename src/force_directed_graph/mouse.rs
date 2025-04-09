@@ -9,8 +9,10 @@ use bevy::{
     transform::components::{GlobalTransform, Transform},
 };
 
-use crate::bevy::common::MouseLocked;
+use crate::force_directed_graph::common::MouseLocked;
 
+/// Observer for drag-and-drop events. Requires a sprite for now. Moves the
+/// entity (node) to the mouse position.
 pub fn drag_n_drop(
     trigger: Trigger<Pointer<Drag>>,
     mut transforms_q: Query<&mut Transform>,
@@ -25,10 +27,14 @@ pub fn drag_n_drop(
     transform.translation = Vec3::new(world_pos.x, world_pos.y, transform.translation.z);
 }
 
+/// Observer for drag-and-drop events. Adds a `MouseLocked` component to the
+/// node entity. This is needed for disabling forces and inertia.
 pub fn drag_start(trigger: Trigger<Pointer<DragStart>>, mut commands: Commands) {
     commands.entity(trigger.event().target).insert(MouseLocked);
 }
 
+/// Observer for drag-and-drop events. Removes the `MouseLocked` component from
+/// the node entity. See [drag_start].
 pub fn drag_end(trigger: Trigger<Pointer<DragEnd>>, mut commands: Commands) {
     commands
         .entity(trigger.event().target)

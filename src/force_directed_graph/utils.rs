@@ -63,6 +63,7 @@ impl FiniteOrRandom for Vec2 {
 }
 
 pub trait ClampFiniteOr {
+    #[allow(dead_code)]
     fn clamp_finite_or(self, min: Self, max: Self, v: Self) -> Self;
 }
 impl ClampFiniteOr for f32 {

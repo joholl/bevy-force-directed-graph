@@ -9,6 +9,8 @@ repell each other) and user input (i.e. drag and drop).
 This project is heavily inspired by [d3-force](https://d3js.org/d3-force) which
 also includes a great explanation about how to simulate a force-directed graph.
 
+Demo: [joholl.github.io/bevy-force-directed-graph](https://joholl.github.io/bevy-force-directed-graph)
+
 ## How the Physics Engine Works
 
 The simulation is very simple. All calculation is based on the following data per node:

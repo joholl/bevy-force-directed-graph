@@ -40,7 +40,6 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          name: wasm-example
           path: examples/wasm
 
   deploy:

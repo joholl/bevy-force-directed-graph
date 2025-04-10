@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use common::{NodeLink, NodePhysics};
+use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;
-use rand::Rng;
+use rand::{Rng as _, SeedableRng as _};
 
 mod common;
 mod forces;
@@ -29,15 +30,13 @@ pub fn run() {
         .run();
 }
 
-const X_EXTENT: f32 = 900.;
-
 /// Spawn camera, nodes, and links
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let mut rng = rand::rng();
+    let mut rng = SmallRng::seed_from_u64(0);
 
     commands.spawn(Camera2d);
 
@@ -51,10 +50,10 @@ fn setup(
             // Distribute colors evenly across the rainbow.
             let color = Color::hsl(360. * i as f32 / num_entities as f32, 0.95, 0.7);
 
-            // Random position ("transform"): from -X_EXTENT/2 to X_EXTENT/2
+            // Start position ("transform") in the center (but start slightly random)
             let transform = Transform::from_xyz(
-                rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
-                rng.random_range(-X_EXTENT / 2.0..X_EXTENT / 2.0),
+                rng.random_range(-1.0..1.0),
+                rng.random_range(-1.0..1.0),
                 rng.random_range(0.0..1.0),
             );
 

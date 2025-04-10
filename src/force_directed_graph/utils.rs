@@ -1,5 +1,6 @@
 use bevy::math::{Vec2, Vec3};
-use rand::Rng as _;
+use rand::rngs::SmallRng;
+use rand::{Rng as _, SeedableRng as _};
 
 pub trait MapNonFinite {
     fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self;
@@ -55,7 +56,7 @@ pub trait FiniteOrRandom {
 impl FiniteOrRandom for Vec2 {
     fn finite_or_random_normalized(self) -> Self {
         self.map_nonfinite(|| {
-            let mut rng = rand::rng();
+            let mut rng = SmallRng::seed_from_u64(0);
             let angle = rng.random_range(0.0..std::f32::consts::TAU); // TAU = 2π
             Vec2::new(angle.cos(), angle.sin())
         })

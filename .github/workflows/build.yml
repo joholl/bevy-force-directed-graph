@@ -1,0 +1,44 @@
+name: Build WASM Example
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        run: cargo install wasm-bindgen-cli
+
+      - name: Build with cargo
+        run: cargo build --target wasm32-unknown-unknown
+
+      - name: Run wasm-bindgen
+        run: |
+          wasm-bindgen --out-dir examples/wasm/target \
+                       --out-name wasm_example \
+                       --target web \
+                       target/wasm32-unknown-unknown/debug/megascope.wasm
+
+      - name: Upload artifact (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: wasm-example
+          path: examples/wasm

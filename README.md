@@ -65,3 +65,9 @@ Now you can run it. To not recompiling bevy unneccessarily, use dynamic linking.
 ```sh
 cargo run --features bevy/dynamic_linking
 ```
+
+# Wasm
+
+cargo install wasm-bindgen-cli
+wasm-bindgen --out-dir examples/wasm/target --out-name wasm_example --target web target/wasm32-unknown-unknown/debug/megascope.wasm
+python -m http.server -d examples/wasm

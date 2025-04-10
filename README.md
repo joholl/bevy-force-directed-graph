@@ -70,6 +70,10 @@ cargo run --features bevy/dynamic_linking
 
 # Wasm
 
+```sh
 cargo install wasm-bindgen-cli
-wasm-bindgen --out-dir examples/wasm/target --out-name wasm_example --target web target/wasm32-unknown-unknown/debug/megascope.wasm
+
+wasm-bindgen --out-dir examples/wasm/target --out-name wasm_example --target web target/wasm32-unknown-unknown/debug/*.wasm
+
 python -m http.server -d examples/wasm
+```

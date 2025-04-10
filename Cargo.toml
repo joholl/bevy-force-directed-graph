@@ -1,5 +1,5 @@
 [package]
-name = "megascope"
+name = "bevy-force-directed-graph"
 version = "0.1.0"
 edition = "2021"
 

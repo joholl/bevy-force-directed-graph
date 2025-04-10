@@ -37,6 +37,7 @@ jobs:
                        --target web target/wasm32-unknown-unknown/release/*.wasm
 
       - name: Upload artifact (optional)
+        id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
           name: wasm-example

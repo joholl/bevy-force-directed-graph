@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::window::PresentMode;
 use common::{NodeLink, NodePhysics};
 use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;
@@ -13,7 +14,17 @@ mod utils;
 /// Run the bevy application. Blocks until the window is closed.
 pub fn run() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((
+            DefaultPlugins,
+            bevy::window::WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Force Directed Graph".to_string(),
+                    present_mode: PresentMode::AutoVsync,
+                    ..default()
+                }),
+                ..default()
+            },
+        ))
         .add_systems(Startup, setup)
         .add_systems(
             Update,

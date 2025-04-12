@@ -12,6 +12,7 @@ features = [
     "bevy_asset",
     "bevy_color",
     "bevy_core_pipeline",
+    "bevy_dev_tools",
     "bevy_gizmos",
     "bevy_mesh_picking_backend",
     "bevy_picking",
@@ -19,12 +20,14 @@ features = [
     "bevy_sprite_picking_backend",
     "bevy_sprite",
     "bevy_state",
+    "bevy_text",
+    "bevy_ui",
     "bevy_window",
     "bevy_winit",
+    "default_font",
     "multi_threaded",
     "wayland",
     "webgl2",
-    "x11",
 ]
 default-features = false
 

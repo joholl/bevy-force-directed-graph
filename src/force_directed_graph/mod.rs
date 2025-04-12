@@ -1,5 +1,26 @@
+<<<<<<< HEAD
 use bevy::prelude::*;
 use bevy::window::PresentMode;
+=======
+use bevy::app::{App, Startup, Update};
+use bevy::asset::Assets;
+use bevy::color::{Alpha as _, Color};
+use bevy::core_pipeline::core_2d::Camera2d;
+use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
+use bevy::ecs::query::{With, Without};
+use bevy::ecs::system::{Commands, Query};
+use bevy::math::primitives::{Circle, Rectangle};
+use bevy::math::{Quat, Vec2, Vec3};
+use bevy::prelude::PluginGroup;
+use bevy::prelude::ResMut;
+use bevy::render::mesh::{Mesh, Mesh2d};
+use bevy::sprite::{ColorMaterial, MeshMaterial2d, Sprite};
+use bevy::text::TextFont;
+use bevy::transform::components::Transform;
+use bevy::utils::default;
+use bevy::window::{self, Window, WindowPlugin};
+use bevy::DefaultPlugins;
+>>>>>>> 8c3eb584f6b0 (show framerate)
 use common::{NodeLink, NodePhysics};
 use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;
@@ -15,14 +36,27 @@ mod utils;
 pub fn run() {
     App::new()
         .add_plugins((
-            DefaultPlugins,
-            bevy::window::WindowPlugin {
-                primary_window: Some(Window {
-                    title: "Force Directed Graph".to_string(),
-                    present_mode: PresentMode::AutoVsync,
-                    ..default()
-                }),
-                ..default()
+            DefaultPlugins.set(
+                // WindowPlugin is needed to uncap framerate
+                WindowPlugin {
+                    primary_window: Some(Window {
+                        title: "Force-directed Graph".to_string(),
+                        present_mode: window::PresentMode::AutoNoVsync,
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+            ),
+            // FpsOverlayPlugin is needed to show framerate
+            FpsOverlayPlugin {
+                config: FpsOverlayConfig {
+                    text_config: TextFont {
+                        font_size: 12.0,
+                        ..default()
+                    },
+                    text_color: Color::WHITE.with_alpha(0.3),
+                    enabled: true,
+                },
             },
         ))
         .add_systems(Startup, setup)
@@ -32,7 +66,7 @@ pub fn run() {
                 forces::mean_to_center::apply_mean_to_center,
                 forces::link::apply_link_force,
                 forces::repulsion::apply_repulsion_force,
-                //forces::galaxy::apply_galaxy_force,
+                forces::galaxy::apply_galaxy_force,
                 forces::window_border::apply_window_border,
                 inertia::apply_velocity,
                 update_links,

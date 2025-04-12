@@ -17,6 +17,8 @@ pub fn apply_mean_to_center(
 ) {
     let center = Vec2::ZERO;
 
+    // TODO iterates twice - unnecessary?
+    // TODO panics when there is 0 nodes?
     let mean = transforms_q
         .iter()
         .map(|(t, _)| t.translation.truncate())
@@ -30,14 +32,8 @@ pub fn apply_mean_to_center(
             transform.translation += correction.extend(0.0);
         }
 
-        // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
-        if transform.translation.x.is_nan()
-            || transform.translation.y.is_nan()
-            || transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &transform);
-        }
+        assert!(transform.is_finite(), "Not finite: {:?}", transform);
     }
 }
 

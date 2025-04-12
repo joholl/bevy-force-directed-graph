@@ -28,11 +28,6 @@ pub fn apply_window_border(
 
         // This is for debugging only, if by a bug we end up with NaN in the transform
         #[cfg(debug_assertions)]
-        if transform.translation.x.is_nan()
-            || transform.translation.y.is_nan()
-            || transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &transform);
-        }
+        assert!(transform.is_finite(), "Not finite: {:?}", transform);
     }
 }

@@ -17,6 +17,7 @@ pub fn apply_galaxy_force(
     for (mut transform, mouse_locked) in &mut transforms_q {
         if mouse_locked.is_none() {
             let position = transform.translation;
+            // TODO what if position is 0/0?
             let position_rotated_by_90 = Quat::from_rotation_z(90.0_f32.to_radians()) * position;
             let strength = 0.03;
             let force = position_rotated_by_90 * strength * alpha(time.delta_secs());
@@ -25,14 +26,8 @@ pub fn apply_galaxy_force(
                 transform.translation += force;
             }
 
-            // This is for debugging only, if by a bug we end up with NaN in the transform
             #[cfg(debug_assertions)]
-            if transform.translation.x.is_nan()
-                || transform.translation.y.is_nan()
-                || transform.translation.z.is_nan()
-            {
-                panic!("NaN in transform: {:?}", &transform);
-            }
+            assert!(transform.is_finite(), "Not finite: {:?}", transform);
         }
     }
 }

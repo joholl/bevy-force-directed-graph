@@ -40,27 +40,23 @@ pub fn apply_link_force(
         let (mut source_transform, mouse_locked) = transforms_q.get_mut(link.source).unwrap();
         if mouse_locked.is_none() {
             source_transform.translation += position_delta.extend(0.0);
-        }
-        // This is for debugging only, if by a bug we end up with NaN in the transform
-        #[cfg(debug_assertions)]
-        if source_transform.translation.x.is_nan()
-            || source_transform.translation.y.is_nan()
-            || source_transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &source_transform);
+            #[cfg(debug_assertions)]
+            assert!(
+                source_transform.is_finite(),
+                "Not finite: {:?}",
+                source_transform
+            );
         }
 
         let (mut target_transform, mouse_locked) = transforms_q.get_mut(link.target).unwrap();
         if mouse_locked.is_none() {
             target_transform.translation -= position_delta.extend(0.0);
-        }
-        // This is for debugging only, if by a bug we end up with NaN in the transform
-        #[cfg(debug_assertions)]
-        if target_transform.translation.x.is_nan()
-            || target_transform.translation.y.is_nan()
-            || target_transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &target_transform);
+            #[cfg(debug_assertions)]
+            assert!(
+                target_transform.is_finite(),
+                "Not finite: {:?}",
+                target_transform
+            );
         }
     }
 }

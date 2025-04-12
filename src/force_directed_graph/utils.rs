@@ -3,41 +3,46 @@ use rand::rngs::SmallRng;
 use rand::{Rng as _, SeedableRng as _};
 
 pub trait MapNonFinite {
-    fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self;
+    fn map_nonfinite(self, f: impl FnOnce(Self) -> Self) -> Self
+    where
+        Self: Sized;
 }
 impl MapNonFinite for f32 {
-    fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self {
+    fn map_nonfinite(self, f: impl FnOnce(Self) -> Self) -> Self
+    where
+        Self: Sized,
+    {
         if self.is_finite() {
             self
         } else {
-            f()
+            f(self)
         }
     }
 }
 impl MapNonFinite for f64 {
-    fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self {
+    fn map_nonfinite(self, f: impl FnOnce(Self) -> Self) -> Self {
         if self.is_finite() {
             self
         } else {
-            f()
+            f(self)
         }
     }
 }
 impl MapNonFinite for Vec2 {
-    fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self {
-        if self.x.is_finite() && self.y.is_finite() {
+    fn map_nonfinite(self, f: impl FnOnce(Self) -> Self) -> Self {
+        if self.is_finite() {
             self
         } else {
-            f()
+            f(self)
         }
     }
 }
 impl MapNonFinite for Vec3 {
-    fn map_nonfinite(self, f: impl FnOnce() -> Self) -> Self {
-        if self.x.is_finite() && self.y.is_finite() && self.z.is_finite() {
+    fn map_nonfinite(self, f: impl FnOnce(Self) -> Self) -> Self {
+        if self.is_finite() {
             self
         } else {
-            f()
+            f(self)
         }
     }
 }
@@ -47,7 +52,7 @@ pub trait FiniteOr {
 }
 impl<T: MapNonFinite> FiniteOr for T {
     fn finite_or(self, v: Self) -> Self {
-        self.map_nonfinite(|| v)
+        self.map_nonfinite(|_| v)
     }
 }
 pub trait FiniteOrRandom {
@@ -55,7 +60,7 @@ pub trait FiniteOrRandom {
 }
 impl FiniteOrRandom for Vec2 {
     fn finite_or_random_normalized(self) -> Self {
-        self.map_nonfinite(|| {
+        self.map_nonfinite(|_| {
             let mut rng = SmallRng::seed_from_u64(0);
             let angle = rng.random_range(0.0..std::f32::consts::TAU); // TAU = 2π
             Vec2::new(angle.cos(), angle.sin())

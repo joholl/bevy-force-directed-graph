@@ -50,23 +50,13 @@ pub fn apply_repulsion_force(
         // Update the positions of both nodes
         if a_mouse_locked.is_none() {
             a_transform.translation -= force.extend(0.0);
+            #[cfg(debug_assertions)]
+            assert!(a_transform.is_finite(), "Not finite: {:?}", a_transform);
         }
         if b_mouse_locked.is_none() {
             b_transform.translation += force.extend(0.0);
-        }
-
-        // This is for debugging only, if by a bug we end up with NaN in the transform
-        #[cfg(debug_assertions)]
-        if a_transform.translation.x.is_nan()
-            || a_transform.translation.y.is_nan()
-            || a_transform.translation.z.is_nan()
-            || b_transform.translation.x.is_nan()
-            || b_transform.translation.y.is_nan()
-            || b_transform.translation.z.is_nan()
-        {
-            dbg!(a_transform);
-            dbg!(b_transform);
-            panic!("NaN in transform");
+            #[cfg(debug_assertions)]
+            assert!(b_transform.is_finite(), "Not finite: {:?}", b_transform);
         }
     }
 }

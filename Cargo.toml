@@ -16,14 +16,14 @@ features = [
     "bevy_mesh_picking_backend",
     "bevy_picking",
     "bevy_render",
-    "bevy_sprite",
     "bevy_sprite_picking_backend",
+    "bevy_sprite",
     "bevy_state",
     "bevy_window",
     "bevy_winit",
     "multi_threaded",
-    "webgl2",
     "wayland",
+    "webgl2",
     "x11",
 ]
 default-features = false

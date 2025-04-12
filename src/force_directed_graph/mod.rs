@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-use bevy::prelude::*;
-use bevy::window::PresentMode;
-=======
 use bevy::app::{App, Startup, Update};
 use bevy::asset::Assets;
 use bevy::color::{Alpha as _, Color};
@@ -20,7 +16,6 @@ use bevy::transform::components::Transform;
 use bevy::utils::default;
 use bevy::window::{self, Window, WindowPlugin};
 use bevy::DefaultPlugins;
->>>>>>> 8c3eb584f6b0 (show framerate)
 use common::{NodeLink, NodePhysics};
 use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;

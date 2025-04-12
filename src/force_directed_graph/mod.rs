@@ -61,7 +61,7 @@ pub fn run() {
                 forces::mean_to_center::apply_mean_to_center,
                 forces::link::apply_link_force,
                 forces::repulsion::apply_repulsion_force,
-                forces::galaxy::apply_galaxy_force,
+                //forces::galaxy::apply_galaxy_force,
                 forces::window_border::apply_window_border,
                 inertia::apply_velocity,
                 update_links,

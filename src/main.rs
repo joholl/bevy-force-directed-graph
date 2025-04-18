@@ -1,5 +1,3 @@
-mod force_directed_graph;
-
 fn main() {
-    force_directed_graph::run();
+    bevy_force_directed_graph::force_directed_graph::run();
 }

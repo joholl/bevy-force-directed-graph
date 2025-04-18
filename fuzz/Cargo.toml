@@ -1,0 +1,50 @@
+[package]
+name = "bevy-force-directed-graph-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+bevy = "0.15.3"
+
+[dependencies.bevy-force-directed-graph]
+path = ".."
+
+[[bin]]
+name = "fuzz_mean_to_center"
+path = "fuzz_targets/fuzz_mean_to_center.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_galaxy"
+path = "fuzz_targets/fuzz_galaxy.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_link"
+path = "fuzz_targets/fuzz_link.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_repulsion"
+path = "fuzz_targets/fuzz_repulsion.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_window_border"
+path = "fuzz_targets/fuzz_window_border.rs"
+test = false
+doc = false
+bench = false

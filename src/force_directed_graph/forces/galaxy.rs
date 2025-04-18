@@ -1,10 +1,13 @@
-use crate::force_directed_graph::common::{alpha, MouseLocked, NodePhysics};
+use crate::force_directed_graph::{
+    common::{alpha, MouseLocked, NodePhysics},
+    utils::{ClampF32Range as _, FiniteOr},
+};
 use bevy::{
     ecs::{
         query::With,
         system::{Query, Res},
     },
-    math::Quat,
+    math::{Quat, Vec3},
     time::Time,
     transform::components::Transform,
 };
@@ -17,22 +20,15 @@ pub fn apply_galaxy_force(
     for (mut transform, mouse_locked) in &mut transforms_q {
         if mouse_locked.is_none() {
             let position = transform.translation;
-            let position_rotated_by_90 = Quat::from_rotation_z(90.0_f32.to_radians()) * position;
+            let position_rotated_by_90 = (Quat::from_rotation_z(90.0_f32.to_radians()) * position)
+                .clamp_f32_range()
+                .finite_or(Vec3::ZERO);
             let strength = 0.03;
             let force = position_rotated_by_90 * strength * alpha(time.delta_secs());
 
-            if mouse_locked.is_none() {
-                transform.translation += force;
-            }
-
-            // This is for debugging only, if by a bug we end up with NaN in the transform
+            transform.translation = (transform.translation + force).clamp_f32_range();
             #[cfg(debug_assertions)]
-            if transform.translation.x.is_nan()
-                || transform.translation.y.is_nan()
-                || transform.translation.z.is_nan()
-            {
-                panic!("NaN in transform: {:?}", &transform);
-            }
+            assert!(transform.is_finite(), "Not finite: {:?}", transform);
         }
     }
 }

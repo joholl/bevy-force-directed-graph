@@ -1,4 +1,7 @@
-use crate::force_directed_graph::common::{MouseLocked, NodePhysics};
+use crate::force_directed_graph::{
+    common::{MouseLocked, NodePhysics},
+    utils::ClampF32Range as _,
+};
 use bevy::{
     ecs::{query::With, system::Query},
     math::Vec2,
@@ -17,26 +20,25 @@ pub fn apply_mean_to_center(
 ) {
     let center = Vec2::ZERO;
 
-    let mean = transforms_q
+    // TODO iterates twice - unnecessary?
+    // If there are zero nodes, the division will not be executed
+    let mean = (transforms_q
         .iter()
         .map(|(t, _)| t.translation.truncate())
         .sum::<Vec2>()
-        / transforms_q.iter().count() as f32;
+        .clamp_f32_range()
+        / transforms_q.iter().count() as f32)
+        .clamp_f32_range();
 
     let correction = center - mean;
 
     for (mut transform, mouse_locked) in &mut transforms_q {
         if mouse_locked.is_none() {
-            transform.translation += correction.extend(0.0);
-        }
+            transform.translation =
+                (transform.translation + correction.extend(0.0)).clamp_f32_range();
 
-        // This is for debugging only, if by a bug we end up with NaN in the transform
-        #[cfg(debug_assertions)]
-        if transform.translation.x.is_nan()
-            || transform.translation.y.is_nan()
-            || transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &transform);
+            #[cfg(debug_assertions)]
+            assert!(transform.is_finite(), "Not finite: {:?}", transform);
         }
     }
 }

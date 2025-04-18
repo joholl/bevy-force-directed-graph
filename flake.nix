@@ -1,37 +1,97 @@
 {
   inputs = {
-    #nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    #nixurl = "github:nixos/nixpkgs?ref=nixos-unstable";
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
+  # outputs =
+  #   { self, nixpkgs }:
+  #   let
+  #     pkgs = import nixpkgs { system = "x86_64-linux"; };
+  #   in
+  #   {
+  #     devShells.x86_64-linux.default = mkShell rec {
+  #       nativeBuildInputs = [
+  #         pkg-config
+  #       ];
+  #       buildInputs = [
+  #         rustc
+  #         cargo
+  #         mold
+
+  #         udev
+  #         alsa-lib
+  #         vulkan-loader
+  #         #xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr
+  #         wayland
+
+  #         libxkbcommon
+
+  #         ############
+  #         rust-analyzer
+
+  #         # for cargo fuzz
+  #         libiconv
+  #         openssl
+  #         pkg-config
+  #       ];
+  #       LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
+  #     };
+  #   };
+
   outputs =
-    { self, nixpkgs }:
-    let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
-    in
     {
-      devShells.x86_64-linux.default = pkgs.mkShell rec {
-        nativeBuildInputs = [
-          pkgs.pkg-config
-        ];
-        buildInputs = [
-          pkgs.rustc
-          pkgs.cargo
-          pkgs.mold
+      self,
+      nixpkgs,
+      rust-overlay,
+      flake-utils,
+      ...
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
+      in
+      {
+        devShells.default =
+          with pkgs;
+          mkShell {
+            buildInputs = [
+              #rust-bin.beta.latest.default
+              #rust-bin.selectLatestNightlyWith (toolchain: toolchain.default)
+              rust-bin.nightly.latest.default
+              cargo
+              mold
 
-          pkgs.udev
-          pkgs.alsa-lib
-          pkgs.vulkan-loader
-          #pkgs.xorg.libX11 pkgs.xorg.libXcursor pkgs.xorg.libXi pkgs.xorg.libXrandr
-          pkgs.wayland
+              udev
+              alsa-lib
+              vulkan-loader
+              # xorg.libX11 xorg.libXcursor xorg.libXi xorg.libXrandr
+              wayland
 
-          pkgs.libxkbcommon
+              libxkbcommon
 
-          ############
-          pkgs.rust-analyzer
-        ];
-        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
-      };
-    };
+              ############
+              rust-analyzer
+
+              # for cargo fuzz
+              libiconv
+              openssl
+              pkg-config
+            ];
+            #LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
+
+            # shellHook = ''
+            #   alias ls=eza
+            #   alias find=fd
+            # '';
+          };
+      }
+    );
 }
 
 # nix flake show

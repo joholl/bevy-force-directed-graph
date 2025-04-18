@@ -7,10 +7,11 @@ use bevy::ecs::query::{With, Without};
 use bevy::ecs::system::{Commands, Query};
 use bevy::math::primitives::{Circle, Rectangle};
 use bevy::math::{Quat, Vec2, Vec3};
+use bevy::picking::mesh_picking::MeshPickingPlugin;
 use bevy::prelude::PluginGroup;
 use bevy::prelude::ResMut;
 use bevy::render::mesh::{Mesh, Mesh2d};
-use bevy::sprite::{ColorMaterial, MeshMaterial2d, Sprite};
+use bevy::sprite::{ColorMaterial, MeshMaterial2d};
 use bevy::text::TextFont;
 use bevy::transform::components::Transform;
 use bevy::utils::default;
@@ -42,6 +43,8 @@ pub fn run() {
                     ..Default::default()
                 },
             ),
+            // For drag-and-drop events
+            MeshPickingPlugin,
             // FpsOverlayPlugin is needed to show framerate
             FpsOverlayPlugin {
                 config: FpsOverlayConfig {
@@ -100,12 +103,6 @@ fn setup(
             // Spawn the node entity with its components (Sprite, Mesh2d, etc.)
             commands
                 .spawn((
-                    // Transparent sprite, only needed for drag and drop
-                    Sprite {
-                        color: Color::srgba(0.0, 0.0, 0.0, 0.0),
-                        custom_size: Some(Vec2::new(radius, radius)),
-                        ..default()
-                    },
                     // Actual appearance
                     Mesh2d(shape),
                     MeshMaterial2d(materials.add(color)),

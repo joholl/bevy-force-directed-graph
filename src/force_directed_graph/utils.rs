@@ -83,6 +83,33 @@ impl ClampFiniteOr for f64 {
     }
 }
 
+pub trait ClampF32Range {
+    /// Maps [f32::NEG_INFINITY] to [f32::MIN] and [f32::INFINITY] to [f32::MAX].
+    fn clamp_f32_range(self) -> Self;
+}
+
+impl ClampF32Range for f32 {
+    fn clamp_f32_range(self) -> Self {
+        self.clamp(f32::MIN, f32::MAX)
+    }
+}
+
+impl ClampF32Range for Vec2 {
+    fn clamp_f32_range(self) -> Self {
+        Vec2::new(self.x.clamp_f32_range(), self.y.clamp_f32_range())
+    }
+}
+
+impl ClampF32Range for Vec3 {
+    fn clamp_f32_range(self) -> Self {
+        Vec3::new(
+            self.x.clamp_f32_range(),
+            self.y.clamp_f32_range(),
+            self.z.clamp_f32_range(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,7 +120,7 @@ mod tests {
                 paste::item! {
                     #[test]
                     fn [< test_map_nonfinite_ $name >] () {
-                        assert_eq!($input_object.map_nonfinite(|| $input_default), $expected);
+                        assert_eq!($input_object.map_nonfinite(|_| $input_default), $expected);
                     }
                 }
 

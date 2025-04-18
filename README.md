@@ -1,3 +1,5 @@
+[![Build WASM Example](https://github.com/joholl/bevy-force-directed-graph/actions/workflows/build.yml/badge.svg)](https://github.com/joholl/bevy-force-directed-graph/actions/workflows/build.yml)
+
 # bevy-force-directed-graph
 
 `bevy-force-directed-graph` visualized graphs using a [force-directed graph
@@ -76,4 +78,50 @@ cargo install wasm-bindgen-cli
 wasm-bindgen --out-dir examples/wasm/target --out-name wasm_example --target web target/wasm32-unknown-unknown/debug/*.wasm
 
 python -m http.server -d examples/wasm
+```
+
+# Fuzzing
+
+It's surprisingly easy to create cool new forces. Unfortunately, it's also
+surprisingly hard to do robust float arithmetic. Ultimately, we want to prevent
+node positions with `f32::NAN`, `f32::INFINITY` or `f32::NEG_INFINITY`.
+
+For example, calculating the angle between two vectors works fine unless when
+the nodes have the same position. On top of that, none-finite elements like
+`f32::NAN` have a viral character since almost all operations involving
+`f32::NAN` will result in `f32::NAN`, again. Even the addition of two floats can
+result in `f32::INFINITY` which when multiplied with zero will lead to
+`f32::NAN`.
+
+Here's a healthy way of thinking: **all** float operations can lead to
+`f32::INFINITY`/`f32::NEG_INFINITY` and should be mapped to
+`f32::MIN`/`f32::MAX` immediately. The following will lead to `f32::NAN` if `a`
+and `b` are sufficiently high and `c` is zero:
+
+```rust
+let result = a * b * c;
+```
+
+To find such bugs, we need to add debug assertions to all state-changing
+assignments in our update functions, causing a program crash for non-finite
+values:
+
+```rust
+#[cfg(debug_assertions)]
+assert!(transform.is_finite(), "Not finite: {:?}", transform);
+```
+
+To find edge-cases much more quickly, use can use fuzzing (via cargo-fuzz which
+uses libfuzzer under the hood). Since the `sanitizer` flag is currently
+unstable, we need to switch to nightly for that.
+
+A few minutes per fuzz target are usually enough to find issues.
+
+```
+cargo install cargo-fuzz
+cargo fuzz run fuzz_galaxy
+cargo fuzz run fuzz_link
+cargo fuzz run fuzz_mean_to_center
+cargo fuzz run fuzz_repulsion
+cargo fuzz run fuzz_window_border
 ```

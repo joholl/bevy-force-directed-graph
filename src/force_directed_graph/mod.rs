@@ -21,11 +21,11 @@ use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;
 use rand::{Rng as _, SeedableRng as _};
 
-mod common;
-mod forces;
-mod inertia;
-mod mouse;
-mod utils;
+pub mod common;
+pub mod forces;
+pub mod inertia;
+pub mod mouse;
+pub mod utils;
 
 /// Run the bevy application. Blocks until the window is closed.
 pub fn run() {

@@ -5,21 +5,69 @@ on:
   pull_request:
 
 jobs:
-  build:
+  cargo-test:
+    name: cargo test
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install dependencies
+        run: sudo apt-get install libwayland-dev libxkbcommon-dev
+      - run: cargo test
 
+  cargo-fmt:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install dependencies
+        run: sudo apt-get install libwayland-dev libxkbcommon-dev
+      - run: cargo fmt --all -- --check
+
+  cargo-clippy:
+    name: cargo clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install dependencies
+        run: sudo apt-get install libwayland-dev libxkbcommon-dev
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+
+  cargo-doc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Install dependencies
+        run: sudo apt-get install libwayland-dev libxkbcommon-dev
+      - run: cargo doc
+
+  cargo-fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly
+      - name: Install dependencies
+        run: sudo apt-get install libwayland-dev libxkbcommon-dev libasound2-dev libudev-dev
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz
+      - run: cargo fuzz run fuzz_galaxy -- -max_total_time=20
+      - run: cargo fuzz run fuzz_link -- -max_total_time=20
+      - run: cargo fuzz run fuzz_mean_to_center -- -max_total_time=20
+      - run: cargo fuzz run fuzz_repulsion -- -max_total_time=20
+      - run: cargo fuzz run fuzz_window_border -- -max_total_time=20
+
+  build-wasm:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           rustflags:
-
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          override: true
 
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
@@ -43,7 +91,8 @@ jobs:
           path: examples/wasm
 
   deploy:
-    needs: build
+    if: github.ref == 'refs/heads/main'
+    needs: build-wasm
     runs-on: ubuntu-latest
     environment:
       name: github-pages

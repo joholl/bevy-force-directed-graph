@@ -44,16 +44,9 @@ pub fn apply_velocity(
         // Update state
         if mouse_locked.is_none() {
             transform.translation = position_next.extend(transform.translation.z);
+            #[cfg(debug_assertions)]
+            assert!(transform.is_finite(), "Not finite: {:?}", transform);
         }
         node_physics.previous_position = previous_position_next;
-
-        // This is for debugging only, if by a bug we end up with NaN in the transform
-        #[cfg(debug_assertions)]
-        if transform.translation.x.is_nan()
-            || transform.translation.y.is_nan()
-            || transform.translation.z.is_nan()
-        {
-            panic!("NaN in transform: {:?}", &transform);
-        }
     }
 }

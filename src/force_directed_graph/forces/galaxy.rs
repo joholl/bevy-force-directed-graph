@@ -19,7 +19,7 @@ pub fn apply_galaxy_force(
 ) {
     for (mut transform, mouse_locked) in &mut transforms_q {
         if mouse_locked.is_none() {
-            let position = transform.translation;
+            let position = transform.translation.truncate().extend(0.0);
             let position_rotated_by_90 = (Quat::from_rotation_z(90.0_f32.to_radians()) * position)
                 .clamp_f32_range()
                 .finite_or(Vec3::ZERO);

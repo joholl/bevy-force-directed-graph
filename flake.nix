@@ -60,6 +60,7 @@
         devShells.default =
           with pkgs;
           mkShell {
+            nativeBuildInputs = [ pkg-config ];
             buildInputs = [
               #rust-bin.beta.latest.default
               #rust-bin.selectLatestNightlyWith (toolchain: toolchain.default)
@@ -81,7 +82,6 @@
               # for cargo fuzz
               libiconv
               openssl
-              pkg-config
             ];
             #LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
 

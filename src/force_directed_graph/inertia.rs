@@ -5,6 +5,8 @@ use bevy::{
     transform::components::Transform,
 };
 
+use super::previous_time_delta::PreviousTimeDeltaSecs;
+
 /// Given a node position (Transform) and its previous position (NodePhysics),
 /// this function calculates the new position using Verlet integration.
 ///
@@ -22,9 +24,13 @@ use bevy::{
 ///  - previous position: result of the last Verlet integration step
 pub fn apply_velocity(
     mut nodes_q: Query<(&mut Transform, &mut NodePhysics, Option<&MouseLocked>)>,
-    _time: Res<Time>,
+    time: Res<Time>,
+    time_previous: Res<PreviousTimeDeltaSecs>,
 ) {
-    // TODO when dt (aka the framerate) changes, this gets a bit messy
+    // We need to account for non-constant time steps
+    // https://en.wikipedia.org/wiki/Verlet_integration#Non-constant_time_differences
+    let dt = time.delta_secs();
+    let dt_previous = time_previous.delta_secs();
 
     //let dt = time.delta_secs();
     let velocity_decay = 0.95;

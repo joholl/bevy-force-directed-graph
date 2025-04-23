@@ -7,7 +7,7 @@ use bevy::{
 /// Component to save a nodes previous position. Instead of saving the velocity,
 /// we approximate the velocity via the difference between the current and
 /// previous position. This is needed for inertia.
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct NodePhysics {
     pub previous_position: Vec2,
 }
@@ -30,11 +30,9 @@ pub struct NodeLink {
 
 // `MouseLocked` is a marker component for node entities which are currently
 // drag-and-dropped. This is needed for disabling forces and inertia
-// temporarily.
+// temporarily. Additionally, we save the velocity of the mouse movement to
+// apply it after the user lets go.
 #[derive(Component, Debug)]
-pub struct MouseLocked;
-
-/* Account for variable frame rate (i.e. variable time step) */
-pub fn alpha(dt_secs: f32) -> f32 {
-    2.4 * dt_secs
+pub struct MouseLocked {
+    pub velocity: Vec2,
 }

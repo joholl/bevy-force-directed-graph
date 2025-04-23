@@ -15,7 +15,9 @@ Demo: [joholl.github.io/bevy-force-directed-graph](https://joholl.github.io/bevy
 
 ## How the Physics Engine Works
 
-The simulation is very simple. All calculation is based on the following data per node:
+The physics engine is based on Verlet integration. The following is a less technical summary. See also [more details about integration in general and verlet integration in particular](docs/verlet.md).
+
+All calculations are based on the following data per node:
 * position (x: f32, y: f32)
 * last position (x: f32, y: f32)
 * locked (bool), true if forces/inertia must not move a node since it is dragged by the user
@@ -23,10 +25,10 @@ The simulation is very simple. All calculation is based on the following data pe
 Physical Value|Implementation
 -|-
 position | Very important, all forces (and inertia) directly modify the position
-velocity | We do not save/modify the velocity. Instead, we use use the position of the previous simulation step to approximate the velocity (see [Verlet Integration](https://en.wikipedia.org/wiki/Verlet_integration)). This is needed for inertia.
+velocity | We do not save/modify the velocity. Instead, we use use the position of the previous simulation step to approximate the velocity. This is needed for inertia.
 acceleration | Forces change the position directly. Thus we do not need to save/modify the acceleration which makes it **irrelevant**.
 mass | Assumed to be 1 for all nodes and thus **irrelevant**
-time step | Assumed to be constant and thus **irrelevant**
+time step | forces must be multiplied with `Res<VerletRes>::delta_secs_squared()` before adding them to a position
 
 ## Forces
 
@@ -118,6 +120,8 @@ unstable, we need to switch to nightly for that.
 A few minutes per fuzz target are usually enough to find issues.
 
 ```
+# Currently broken. Will fix this later.
+
 cargo install cargo-fuzz
 cargo fuzz run fuzz_galaxy
 cargo fuzz run fuzz_link

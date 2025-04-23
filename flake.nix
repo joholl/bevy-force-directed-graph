@@ -59,7 +59,7 @@
       {
         devShells.default =
           with pkgs;
-          mkShell {
+          mkShell rec {
             nativeBuildInputs = [ pkg-config ];
             buildInputs = [
               #rust-bin.beta.latest.default
@@ -83,7 +83,7 @@
               libiconv
               openssl
             ];
-            #LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
+            LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
 
             # shellHook = ''
             #   alias ls=eza

@@ -32,15 +32,16 @@ pub fn apply_mean_to_center(
 
     let correction = center - mean;
 
-    for (mut transform, mouse_locked) in &mut transforms_q {
-        if mouse_locked.is_none() {
+    transforms_q
+        .iter_mut()
+        .filter(|(_, mouse_locked)| mouse_locked.is_none())
+        .for_each(|(mut transform, _)| {
             transform.translation =
                 (transform.translation + correction.extend(0.0)).clamp_f32_range();
 
             #[cfg(debug_assertions)]
             assert!(transform.is_finite(), "Not finite: {:?}", transform);
-        }
-    }
+        });
 }
 
 #[cfg(test)]
@@ -48,7 +49,7 @@ mod tests {
     use super::apply_mean_to_center;
     use crate::force_directed_graph::common::{MouseLocked, NodePhysics};
     use bevy::app::{App, Update};
-    use bevy::math::Vec3;
+    use bevy::math::{Vec2, Vec3};
     use bevy::transform::components::Transform;
 
     #[test]
@@ -114,7 +115,9 @@ mod tests {
                 .spawn((
                     NodePhysics::from_transform(transform2_mouse_locked),
                     transform2_mouse_locked,
-                    MouseLocked,
+                    MouseLocked {
+                        velocity: Vec2::ZERO,
+                    },
                 ))
                 .id(),
         ];

@@ -3,13 +3,15 @@ use bevy::{
         observer::Trigger,
         system::{Commands, Query},
     },
-    math::Vec3,
+    math::{Vec2, Vec3},
     picking::events::{Drag, DragEnd, DragStart, Pointer},
     render::camera::Camera,
     transform::components::{GlobalTransform, Transform},
 };
 
-use crate::force_directed_graph::common::MouseLocked;
+use crate::force_directed_graph::{common::MouseLocked, utils::ClampF32Range};
+
+use super::common::NodePhysics;
 
 /// Observer for drag-and-drop events. Requires a sprite for now. Moves the
 /// entity (node) to the mouse position.
@@ -30,12 +32,25 @@ pub fn drag_n_drop(
 /// Observer for drag-and-drop events. Adds a `MouseLocked` component to the
 /// node entity. This is needed for disabling forces and inertia.
 pub fn drag_start(trigger: Trigger<Pointer<DragStart>>, mut commands: Commands) {
-    commands.entity(trigger.event().target).insert(MouseLocked);
+    commands.entity(trigger.event().target).insert(MouseLocked {
+        velocity: Vec2::ZERO,
+    });
 }
 
 /// Observer for drag-and-drop events. Removes the `MouseLocked` component from
 /// the node entity. See [drag_start].
-pub fn drag_end(trigger: Trigger<Pointer<DragEnd>>, mut commands: Commands) {
+pub fn drag_end(
+    trigger: Trigger<Pointer<DragEnd>>,
+    mut transforms_q: Query<(&mut NodePhysics, &MouseLocked)>,
+    mut commands: Commands,
+) {
+    let (mut node_physics, mouse_locked) = transforms_q.get_mut(trigger.entity()).unwrap();
+
+    // since verlet integration was locked, position is equal to previous position
+    // manipulate previous position to achive mouse velocity
+    node_physics.previous_position =
+        (node_physics.previous_position - mouse_locked.velocity).clamp_f32_range();
+
     commands
         .entity(trigger.event().target)
         .remove::<MouseLocked>();

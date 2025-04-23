@@ -1,4 +1,8 @@
+pub mod cutoff_force;
+pub mod friction;
 pub mod galaxy;
+pub mod gravity;
+pub mod initial_velocity;
 pub mod link;
 pub mod mean_to_center;
 pub mod repulsion;

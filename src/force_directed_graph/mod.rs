@@ -1,3 +1,5 @@
+use core::f32;
+
 use bevy::app::{App, Startup, Update};
 use bevy::asset::Assets;
 use bevy::color::{Alpha as _, Color};
@@ -18,17 +20,16 @@ use bevy::utils::default;
 use bevy::window::{self, Window, WindowPlugin};
 use bevy::DefaultPlugins;
 use common::{NodeLink, NodePhysics};
-use previous_time_delta::PreviousTimeDeltaPlugin;
 use rand::rngs::SmallRng;
 use rand::seq::IndexedRandom as _;
 use rand::{Rng as _, SeedableRng as _};
+use verlet::VerletPlugin;
 
 pub mod common;
 pub mod forces;
-pub mod inertia;
 pub mod mouse;
-pub mod previous_time_delta;
 pub mod utils;
+pub mod verlet;
 
 /// Run the bevy application. Blocks until the window is closed.
 pub fn run() {
@@ -59,22 +60,51 @@ pub fn run() {
                 },
             },
             // TODO
-            PreviousTimeDeltaPlugin,
+            VerletPlugin {
+                velocity_decay: 1.0,
+            },
         ))
         .add_systems(Startup, setup)
         .add_systems(
             Update,
             (
-                //forces::mean_to_center::apply_mean_to_center,
-                //forces::link::apply_link_force,
-                //forces::repulsion::apply_repulsion_force,
-                forces::galaxy::apply_galaxy_force,
-                forces::window_border::apply_window_border,
-                inertia::apply_velocity,
+                //forces::initial_velocity::apply_initial_velocity(500.0),
+                forces::friction::apply_friction(400.0),
+                //forces::cutoff_force::apply_cutoff_force(100.0),
+                //forces::gravity::apply_gravity_force(200000.0),
+                forces::mean_to_center::apply_mean_to_center,
+                forces::link::apply_link_force(1000.0, f32::MAX),
+                forces::repulsion::apply_repulsion_force(20000000.0),
+                //forces::galaxy::apply_galaxy_force(1.5),
+                forces::window_border::apply_window_border(0.5),
                 update_links,
             ),
         )
         .run();
+}
+
+/// Spawn camera, nodes, and links
+fn _setup_simple(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    commands.spawn(Camera2d);
+
+    let radius = 15.0;
+    let shape = meshes.add(Circle::new(radius));
+    let color = Color::hsl(100.0, 0.95, 0.7);
+    let transform = Transform::from_xyz(0.0, 300.0, 0.0);
+    commands
+        .spawn((
+            Mesh2d(shape),
+            MeshMaterial2d(materials.add(color)),
+            transform,
+            NodePhysics::from_transform(transform),
+        ))
+        .observe(mouse::drag_n_drop)
+        .observe(mouse::drag_start)
+        .observe(mouse::drag_end);
 }
 
 /// Spawn camera, nodes, and links
@@ -99,8 +129,8 @@ fn setup(
 
             // Start position ("transform") in the center (but start slightly random)
             let transform = Transform::from_xyz(
-                rng.random_range(-1.0..1.0),
-                rng.random_range(-1.0..1.0),
+                rng.random_range(-100.0..100.0),
+                rng.random_range(-100.0..100.0),
                 rng.random_range(0.0..1.0),
             );
 

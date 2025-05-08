@@ -31,7 +31,7 @@ we need to integrate over the acceleration over time.
 
 ```math
 \vec{s}(t) = \vec{s}_0 + \int_0^t \vec{v}(\tau)d\tau \\[10pt]
-\vec{s}(t) = \vec{s}_0 + \int_0^t \left( \vec{v}_0 + \int_0^\tau \vec{a}(\Tau)d\Tau \right)d\tau
+\vec{s}(t) = \vec{s}_0 + \int_0^t \left( \vec{v}_0 + \int_0^\tau \vec{a}(T)dT \right)d\tau
 ```
 
 Anyone who has ever programmed, knows how simple this is:

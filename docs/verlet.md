@@ -60,11 +60,11 @@ For timestep `t = 0`, we have exact information:
 
 ```math
 \displaylines{
-    \textrm{given:} \quad a = 1\frac{m}{s^2}, \quad Δt=1s, \quad s_0=0m, \quad v_0=0\frac{m}{s} \\[10pt]
+    \textrm{given:} \quad a = 1\mathrm{\frac{m}{s^2}}, \quad Δt=1\mathrm{s}, \quad s_0=0\mathrm{m}, \quad v_0=0\mathrm{\frac{m}{s}} \\[10pt]
 
 
-    s_1 = s_0 + v_0 Δt = 0m + 0\frac{m}{s} \cdot 1s = 0m \\[10pt]
-    v_1 = v_0 + a Δt = 0\frac{m}{s} + 1\frac{m}{s^2} \cdot 1s = 1\frac{m}{s}
+    s_1 = s_0 + v_0 Δt = 0\mathrm{m} + 0\mathrm{\frac{m}{s}} \cdot 1\mathrm{s} = 0\mathrm{m} \\[10pt]
+    v_1 = v_0 + a Δt = 0\mathrm{\frac{m}{s}} + 1\mathrm{\frac{m}{s^2}} \cdot 1\mathrm{s} = 1\mathrm{\frac{m}{s}}
 }
 ```
 
@@ -72,10 +72,10 @@ That is already quite incorrect. With continuous time, we have:
 
 ```math
 \displaylines{
-    s(t) = s_0 + \int_0^{t} v(\tau) d\tau = 0m + \int_0^{t} \tau \frac{m}{s^2} d\tau = \frac{1}{2} t^2 \frac{m}{s^2} \qquad
-    s(t=1s) = \frac{1}{2}m \\[10pt]
-    v(t) = v_0 + \int_0^{t} a(\tau) d\tau = 0\frac{m}{s} + \int_0^{t} 1\frac{m}{s^2} d\tau = t \frac{m}{s^2} \qquad
-    v(t=1s) = 1\frac{m}{s} \\[10pt]
+    s(t) = s_0 + \int_0^{t} v(\tau) d\tau = 0\mathrm{m} + \int_0^{t} \tau \mathrm{\frac{m}{s^2}} d\tau = \frac{1}{2} t^2 \mathrm{\frac{m}{s^2}} \qquad
+    s(t=1\mathrm{s}) = \frac{1}{2}\mathrm{m} \\[10pt]
+    v(t) = v_0 + \int_0^{t} a(\tau) d\tau = 0\mathrm{\frac{m}{s}} + \int_0^{t} 1\mathrm{\frac{m}{s^2}} d\tau = t \mathrm{\frac{m}{s^2}} \qquad
+    v(t=1\mathrm{s}) = 1\mathrm{\frac{m}{s}} \\[10pt]
 }
 ```
 

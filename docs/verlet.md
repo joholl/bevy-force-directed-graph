@@ -72,9 +72,9 @@ That is already quite incorrect. With continuous time, we have:
 
 ```math
 \displaylines{
-    s(t) \int_0^{t} v(\tau) d\tau = \frac{1}{2} t^2 \qquad
+    s(t) = s_0 + \int_0^{t} v(\tau) d\tau = 0m + \int_0^{t} \tau \frac{m}{s^2} d\tau = \frac{1}{2} t^2 \frac{m}{s^2} \qquad
     s(t=1s) = \frac{1}{2}m \\[10pt]
-    v(t) = \int_0^{t} 1\frac{m}{s^2} d\tau = t \qquad
+    v(t) = v_0 + \int_0^{t} a(\tau) d\tau = 0\frac{m}{s} + \int_0^{t} 1\frac{m}{s^2} d\tau = t \frac{m}{s^2} \qquad
     v(t=1s) = 1\frac{m}{s} \\[10pt]
 }
 ```

@@ -30,17 +30,21 @@ integrate over the velocity over time. And to get a velocity at time `t` (`v(t)`
 we need to integrate over the acceleration over time.
 
 ```math
-\vec{s}(t) = \vec{s}_0 + \int_0^t \vec{v}(\tau)d\tau \\[10pt]
-\vec{s}(t) = \vec{s}_0 + \int_0^t \left( \vec{v}_0 + \int_0^\tau \vec{a}(T)dT \right)d\tau
+\displaylines{
+    \vec{s}(t) = \vec{s}_0 + \int_0^t \vec{v}(\tau)d\tau \\[10pt]
+    \vec{s}(t) = \vec{s}_0 + \int_0^t \left( \vec{v}_0 + \int_0^\tau \vec{a}(T)dT \right)d\tau
+}
 ```
 
 Anyone who has ever programmed, knows how simple this is:
 
 ```math
-\textrm{given:} \quad \vec a_i = \frac{\vec F_i}{m} \\[10pt]
+\displaylines{
+    \textrm{given:} \quad \vec a_i = \frac{\vec F_i}{m} \\[10pt]
 
-\vec s_{i+1} = \vec s_{i} + \vec v_i Δt \\[10pt]
-\vec v_{i+1} = \vec v_{i} + \vec a_i Δt \\[10pt]
+    \vec s_{i+1} = \vec s_{i} + \vec v_i Δt \\[10pt]
+    \vec v_{i+1} = \vec v_{i} + \vec a_i Δt
+}
 ```
 
 This is called the [explicit Euler
@@ -55,20 +59,24 @@ discrete time steps, we introduce errors. Let's assume a constant acceleration
 For timestep `t = 0`, we have exact information:
 
 ```math
-\textrm{given:} \quad a = 1\frac{m}{s^2}, \quad Δt=1s, \quad s_0=0m, \quad v_0=0\frac{m}{s} \\[10pt]
+\displaylines{
+    \textrm{given:} \quad a = 1\frac{m}{s^2}, \quad Δt=1s, \quad s_0=0m, \quad v_0=0\frac{m}{s} \\[10pt]
 
 
-s_1 = s_0 + v_0 Δt = 0m + 0\frac{m}{s} \cdot 1s = 0m \\[10pt]
-v_1 = v_0 + a Δt = 0\frac{m}{s} + 1\frac{m}{s^2} \cdot 1s = 1\frac{m}{s} \\[10pt]
+    s_1 = s_0 + v_0 Δt = 0m + 0\frac{m}{s} \cdot 1s = 0m \\[10pt]
+    v_1 = v_0 + a Δt = 0\frac{m}{s} + 1\frac{m}{s^2} \cdot 1s = 1\frac{m}{s}
+}
 ```
 
 That is already quite incorrect. With continuous time, we have:
 
 ```math
-s(t) \int_0^{t} v(\tau) d\tau = \frac{1}{2} t^2 \qquad
-s(t=1s) = \frac{1}{2}m \\[10pt]
-v(t) = \int_0^{t} 1\frac{m}{s^2} d\tau = t \qquad
-v(t=1s) = 1\frac{m}{s} \\[10pt]
+\displaylines{
+    s(t) \int_0^{t} v(\tau) d\tau = \frac{1}{2} t^2 \qquad
+    s(t=1s) = \frac{1}{2}m \\[10pt]
+    v(t) = \int_0^{t} 1\frac{m}{s^2} d\tau = t \qquad
+    v(t=1s) = 1\frac{m}{s} \\[10pt]
+}
 ```
 
 Even the first time step is way off. Why? Because we ignore the change in
@@ -149,10 +157,12 @@ approximation of the acceleration. That means we approximate the acceleration `a
 the velocity half a timestep before (`v_(i - 1/2)`) and after (`v_(i + 1/2)`) devided by `Δt`:
 
 ```math
-\vec{a}_i = \frac{Δ\vec{v}_i}{Δt} = \frac{Δ^2\vec{s}_i}{Δ t^2} \\[10pt]
-= \frac{\vec{v}_{i+\frac{1}{2}} - \vec{v}_{i-\frac{1}{2}}}{Δ t} \\[10pt]
-= \frac{\frac{\vec{s}_{i+1} - \vec{s}_i}{Δt} - \frac{\vec{s}_i - \vec{s}_{i-1}}{Δt}}{Δt} \\[10pt]
-= \frac{\vec{s}_{i+1} - 2 \vec{s}_i + \vec{s}_{i-1}}{Δt^2}
+\displaylines{
+    \vec{a}_i = \frac{Δ\vec{v}_i}{Δt} = \frac{Δ^2\vec{s}_i}{Δ t^2} \\[10pt]
+    = \frac{\vec{v}_{i+\frac{1}{2}} - \vec{v}_{i-\frac{1}{2}}}{Δ t} \\[10pt]
+    = \frac{\frac{\vec{s}_{i+1} - \vec{s}_i}{Δt} - \frac{\vec{s}_i - \vec{s}_{i-1}}{Δt}}{Δt} \\[10pt]
+    = \frac{\vec{s}_{i+1} - 2 \vec{s}_i + \vec{s}_{i-1}}{Δt^2}
+}
 ```
 
 To get the verlet integration equation, let's just solve for `x_(i+1)`:
@@ -199,9 +209,11 @@ s_(i-1) +---X............           |                       |
 Let's start again, this time with `Δt_i`:
 
 ```math
-\vec{a}_i = \frac{Δ\vec{v}_i}{\frac{1}{2}Δt_{i-1} + \frac{1}{2}Δt_{i}} \\[10pt]
-= \frac{\vec{v}_{i+\frac{1}{2}} - \vec{v}_{i-\frac{1}{2}}}{\frac{1}{2}(Δt_{i-1} + Δt_{i})} \\[10pt]
-= \frac{\frac{\vec{s}_{i+1} - \vec{s}_i}{Δt_i} - \frac{\vec{s}_i - \vec{s}_{i-1}}{Δt_{i-1}}}{\frac{1}{2}(Δt_{i-1} + Δt_{i})} \\[20pt]
+\displaylines{
+    \vec{a}_i = \frac{Δ\vec{v}_i}{\frac{1}{2}Δt_{i-1} + \frac{1}{2}Δt_{i}} \\[10pt]
+    = \frac{\vec{v}_{i+\frac{1}{2}} - \vec{v}_{i-\frac{1}{2}}}{\frac{1}{2}(Δt_{i-1} + Δt_{i})} \\[10pt]
+    = \frac{\frac{\vec{s}_{i+1} - \vec{s}_i}{Δt_i} - \frac{\vec{s}_i - \vec{s}_{i-1}}{Δt_{i-1}}}{\frac{1}{2}(Δt_{i-1} + Δt_{i})}
+}
 ```
 
 To get the verlet integration equation, let's just solve for `s_(i+1)`:
@@ -213,8 +225,7 @@ To get the verlet integration equation, let's just solve for `s_(i+1)`:
 Given a resulting force `F` on a body with mass `m`:
 
 ```math
-\vec{s}_{i+1} = \vec{s}_i + (\vec{s}_i - \vec{s}_{i-1}) \frac{Δ t_i}{Δ t_{i-1}} + \frac{\vec{F}_i}m\
-\frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i
+\vec{s}_{i+1} = \vec{s}_i + (\vec{s}_i - \vec{s}_{i-1}) \frac{Δ t_i}{Δ t_{i-1}} + \frac{\vec{F}_i}m \frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i
 ```
 
 ### Implementation
@@ -238,24 +249,18 @@ Step 1: Adding the velocity term:
 Step 2: Adding the resulting force:
 
 ```math
-\vec{s}_{i+1} = \vec{s}_{i+1} \ ' + \frac{\vec{F}_i}m\
-\frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i
+\vec{s}_{i+1} = \vec{s}_{i+1} \ ' + \frac{\vec{F}_i}m \frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i
 ```
 
 Actually, step 2 is in turn multiple steps, since multiple forces are at play:
 
 ```math
-\vec{s}_{i+1} \ '' = \vec{s}_{i+1} \ ' + \frac{\vec{F}_{0,i}}m\
-\frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
-
-
-\vec{s}_{i+1} \ ''' = \vec{s}_{i+1} \ '' + \frac{\vec{F}_{1,i}}m\
-\frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
-
-... \\[10pt]
-
-\vec{s}_{i+1} = \vec{s}_{i+1} \ ''''' + \frac{\vec{F}_{n,i}}m\
-\frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
+\displaylines{
+    \vec{s}_{i+1} \ '' = \vec{s}_{i+1} \ ' + \frac{\vec{F}_{0,i}}m \frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
+    \vec{s}_{i+1} \ ''' = \vec{s}_{i+1} \ '' + \frac{\vec{F}_{1,i}}m \frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
+    ... \\[10pt]
+    \vec{s}_{i+1} = \vec{s}_{i+1} \ ''''' + \frac{\vec{F}_{n,i}}m \frac{Δ t_{i} + Δ t_{i-1}}2\,Δ t_i \\[10pt]
+}
 ```
 
 The order of addition of the forces is irrelevant. However, we must apply step 1
